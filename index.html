@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hanon Scale 12-Key Visualizer</title>
+    <title>Hanon Scale &amp; Parallel Pairs</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -24,24 +24,24 @@
         .apple-key-white {
             background-color: #ffffff;
             border: 1px solid #d2d2d7;
-            border-radius: 0 0 6px 6px;
+            border-radius: 0 0 4px 4px;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.04);
         }
         .apple-key-black {
             background-color: #1d1d1f;
-            border-radius: 0 0 4px 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 0 0 3px 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         .key-active {
             background: linear-gradient(135deg, #0071e3, #409cff) !important;
             border-color: #0071e3 !important;
-            box-shadow: 0 0 12px rgba(0, 113, 227, 0.4) !important;
+            box-shadow: 0 0 10px rgba(0, 113, 227, 0.4) !important;
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-blue-500 selection:text-white">
 
-    <!-- Apple風トップナビゲーション -->
+    <!-- ナビゲーション -->
     <header class="glass-panel sticky top-0 z-50 px-6 py-4 border-b border-gray-200/60">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -49,8 +49,8 @@
                     <i data-lucide="music" class="w-4 h-4"></i>
                 </div>
                 <div>
-                    <h1 class="text-sm font-semibold tracking-tight text-gray-900">Hanon Notes</h1>
-                    <p class="text-[11px] text-gray-500">全24調 1オクターブ（12鍵盤）構成音ビジュアライザー</p>
+                    <h1 class="text-sm font-semibold tracking-tight text-gray-900">Hanon Scale Notes</h1>
+                    <p class="text-[11px] text-gray-500">平行調セット（2オクターブ対応）</p>
                 </div>
             </div>
             <button id="btn-audio-init" class="bg-gray-900 hover:bg-black text-white text-xs font-medium px-4 py-2 rounded-full transition shadow-sm cursor-pointer flex items-center gap-1.5">
@@ -59,21 +59,21 @@
         </div>
     </header>
 
-    <!-- メインコンテンツ -->
-    <main class="flex-1 max-w-4xl w-full mx-auto p-6 space-y-6">
+    <!-- メイン -->
+    <main class="flex-1 max-w-4xl w-4/5 mx-auto p-6 space-y-6">
 
-        <!-- ヒーロー・プレイヤーカード -->
+        <!-- プレイヤーカード -->
         <section class="glass-panel rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-200/60 space-y-6">
             
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <span id="scale-type-tag" class="text-[11px] font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Major Scale</span>
-                    <h2 id="active-title" class="text-2xl font-bold tracking-tight text-gray-900 mt-2">ハ長調 (C Major)</h2>
+                    <span id="scale-pair-tag" class="text-[11px] font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">平行調セット</span>
+                    <h2 id="active-title" class="text-2xl font-bold tracking-tight text-gray-900 mt-2">ハ長調 &amp; イ短調 (C Major / A Minor)</h2>
                 </div>
 
                 <div class="flex items-center gap-2">
                     <button id="btn-play" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-5 py-2.5 rounded-full transition shadow-sm flex items-center gap-2 cursor-pointer">
-                        <i data-lucide="play" class="w-4 h-4 fill-current"></i> 構成音を再生
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i> 2オクターブ再生
                     </button>
                     <button id="btn-stop" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-medium px-4 py-2.5 rounded-full transition hidden flex items-center gap-2 cursor-pointer">
                         <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i> 停止
@@ -81,23 +81,26 @@
                 </div>
             </div>
 
-            <!-- 1オクターブ鍵盤コンテナ (C4 〜 B4 の12音＋高音C) -->
+            <!-- 2オクターブ鍵盤 (C3 〜 C5) -->
             <div class="pt-4 pb-2">
-                <div class="text-[11px] font-medium text-gray-400 mb-2 uppercase tracking-wider">1オクターブの鍵盤（どの音を押さえるか）</div>
+                <div class="flex justify-between items-center mb-2">
+                    <span id="current-mode-label" class="text-[11px] font-medium text-blue-600 uppercase tracking-wider">長調スケール (Major)</span>
+                    <span class="text-[11px] text-gray-400">C3 - C5 (2オクターブ)</span>
+                </div>
                 <div class="overflow-x-auto pb-2 flex justify-center">
-                    <div id="keyboard-container" class="relative inline-flex h-40 bg-gray-100 p-2 rounded-2xl shadow-inner min-w-[420px]">
-                        <!-- 鍵盤がここに描画されます -->
+                    <div id="keyboard-container" class="relative inline-flex h-36 bg-gray-100 p-2 rounded-2xl shadow-inner min-w-[700px]">
+                        <!-- 鍵盤 -->
                     </div>
                 </div>
             </div>
 
         </section>
 
-        <!-- 全24調 リストグリッド -->
+        <!-- 平行調セット選択グリッド -->
         <section class="space-y-3">
-            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-1">すべての調を選択・再生</h3>
+            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-1">平行調セット一覧 (長調 &amp; 和声短音階)</h3>
             <div id="scale-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                <!-- 調カードが自動生成されます -->
+                <!-- カード -->
             </div>
         </section>
 
@@ -105,50 +108,86 @@
 
     <!-- フッター -->
     <footer class="text-center py-8 text-xs text-gray-400 border-t border-gray-200/40">
-        Minimalist Hanon Visualizer ｜ Designed for Focus &amp; Clarity
+        Hanon Parallel Pairs Visualizer
     </footer>
 
-    <!-- スクリプト部 -->
+    <!-- スクリプト -->
     <script>
         lucide.createIcons();
 
-        // 全24調データ（基準C4=60からの正確な半音ステップ：長調 ＆ 和声短音階）
-        const scalesData = [
-            // 長調 (Major) - 1オクターブ内の固有構成音（重複なしのピッチクラス、最後にオクターブ上のCを追加）
-            { id: "C", name: "ハ長調 (C Major)", type: "major", semitones: [0, 2, 4, 5, 7, 9, 11, 12] },
-            { id: "G", name: "ト長調 (G Major)", type: "major", semitones: [7, 9, 11, 0, 2, 4, 6, 7] }, // G A B C D E F# G (F#=6)
-            { id: "D", name: "ニ長調 (D Major)", type: "major", semitones: [2, 4, 6, 7, 9, 11, 1, 2] }, // D E F# G A B C# D
-            { id: "A", name: "イ長調 (A Major)", type: "major", semitones: [9, 11, 1, 2, 4, 6, 8, 9] }, // A B C# D E F# G# A
-            { id: "E", name: "ホ長調 (E Major)", type: "major", semitones: [4, 6, 8, 9, 11, 1, 3, 4] }, // E F# G# A B C# D# E
-            { id: "B", name: "ロ長調 (B Major)", type: "major", semitones: [11, 1, 3, 4, 6, 8, 10, 11] },// B C# D# E F# G# A# B
-            { id: "F#", name: "嬰ヘ長調 (F# Major)", type: "major", semitones: [6, 8, 10, 11, 1, 3, 5, 6] },// F# G# A# B C# D# E#(=F) F#
-            { id: "Db", name: "変ニ長調 (Db Major)", type: "major", semitones: [1, 3, 5, 6, 8, 10, 0, 1] },// Db Eb F Gb Ab Bb C Db
-            { id: "Ab", name: "変イ長調 (Ab Major)", type: "major", semitones: [8, 10, 0, 1, 3, 5, 7, 8] },// Ab Bb C Db Eb F G Ab
-            { id: "Eb", name: "変ホ長調 (Eb Major)", type: "major", semitones: [3, 5, 7, 8, 10, 0, 2, 3] },// Eb F G Ab Bb C D Eb
-            { id: "Bb", name: "変ロ長調 (Bb Major)", type: "major", semitones: [10, 0, 2, 3, 5, 7, 9, 10] },// Bb C D Eb F G A Bb
-            { id: "F", name: "ヘ長調 (F Major)", type: "major", semitones: [5, 7, 9, 10, 0, 2, 4, 5] },  // F G A Bb C D E F
-
-            // 和声短音階 (Harmonic Minor)
-            { id: "Am", name: "イ短調 (A Minor)", type: "harmonic_minor", semitones: [9, 11, 0, 2, 4, 5, 8, 9] },   // A B C D E F G# A
-            { id: "Em", name: "ホ短調 (E Minor)", type: "harmonic_minor", semitones: [4, 6, 7, 9, 11, 0, 3, 4] },   // E F# G A B C D# E
-            { id: "Bm", name: "ロ短調 (B Minor)", type: "harmonic_minor", semitones: [11, 1, 2, 4, 6, 7, 10, 11] }, // B C# D E F# G A# B
-            { id: "F#m", name: "嬰ヘ短調 (F# Minor)", type: "harmonic_minor", semitones: [6, 8, 9, 11, 1, 2, 5, 6] }, // F# G# A B C# D E#(=F) F#
-            { id: "C#m", name: "嬰ハ短調 (C# Minor)", type: "harmonic_minor", semitones: [1, 3, 4, 6, 8, 9, 0, 1] },  // C# D# E F# G# A B#(=C) C#
-            { id: "G#m", name: "嬰ト短調 (G# Minor)", type: "harmonic_minor", semitones: [8, 10, 11, 1, 3, 4, 7, 8] },// G# A# B C# D# E Fx(=G) G#
-            { id: "Bbm", name: "変ロ短調 (Bb Minor)", type: "harmonic_minor", semitones: [10, 0, 1, 3, 5, 6, 9, 10] },// Bb C Db Eb F Gb A Bb
-            { id: "Fm", name: "ヘ短調 (F Minor)", type: "harmonic_minor", semitones: [5, 7, 8, 10, 0, 1, 4, 5] },  // F G Ab Bb C Db E F
-            { id: "Cm", name: "ハ短調 (C Minor)", type: "harmonic_minor", semitones: [0, 2, 3, 5, 7, 8, 11, 12] },  // C D Eb F G Ab B C
-            { id: "Gm", name: "ト短調 (G Minor)", type: "harmonic_minor", semitones: [7, 9, 10, 0, 2, 3, 6, 7] },  // G A Bb C D Eb F# G
-            { id: "Dm", name: "ニ短調 (D Minor)", type: "harmonic_minor", semitones: [2, 4, 5, 7, 9, 10, 1, 2] }  // D E F G A Bb C# D
+        // ハノン準拠の平行調セット（長調 ＆ 和声短音階）
+        // 各ペアに長調データ(major)と短調データ(minor: 和声短音階)を持つ
+        const scalePairs = [
+            {
+                id: "C_Am", name: "ハ長調 & イ短調",
+                major: { name: "ハ長調 (C Major)", root: 48, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "イ短調 (A Harmonic Minor)", root: 57, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            },
+            {
+                id: "G_Em", name: "ト長調 & ホ短調",
+                major: { name: "ト長調 (G Major)", root: 55, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "ホ短調 (E Harmonic Minor)", root: 52, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            },
+            {
+                id: "D_Bm", name: "ニ長調 & ロ短調",
+                major: { name: "ニ長調 (D Major)", root: 50, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "ロ短調 (B Harmonic Minor)", root: 59, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            },
+            {
+                id: "A_F#m", name: "イ長調 & 嬰ヘ短調",
+                major: { name: "イ長調 (A Major)", root: 57, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "嬰ヘ短調 (F# Harmonic Minor)", root: 54, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            },
+            {
+                id: "E_C#m", name: "ホ長調 & 嬰ハ短調",
+                major: { name: "ホ長調 (E Major)", root: 52, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "嬰ハ短調 (C# Harmonic Minor)", root: 49, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            },
+            {
+                id: "B_G#m", name: "ロ長調 & 嬰ト短調",
+                major: { name: "ロ長調 (B Major)", root: 59, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "嬰ト短調 (G# Harmonic Minor)", root: 56, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            },
+            {
+                id: "F#_Dbm", name: "嬰ヘ長調 & 嬰ハ短調(異名)",
+                major: { name: "嬰ヘ長調 (F# Major)", root: 54, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "嬰ハ短調 (C#m / Dbm Harmonic)", root: 49, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            },
+            {
+                id: "Db_Bbm", name: "変ニ長調 & 変ロ短調",
+                major: { name: "変ニ長調 (Db Major)", root: 49, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "変ロ短調 (Bb Harmonic Minor)", root: 58, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            },
+            {
+                id: "Ab_Fm", name: "変イ長調 & ヘ短調",
+                major: { name: "変イ長調 (Ab Major)", root: 56, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "ヘ短調 (F Harmonic Minor)", root: 53, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            },
+            {
+                id: "Eb_Cm", name: "変ホ長調 & ハ短調",
+                major: { name: "変ホ長調 (Eb Major)", root: 51, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "ハ短調 (C Harmonic Minor)", root: 48, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            },
+            {
+                id: "Bb_Gm", name: "変ロ長調 & ト短調",
+                major: { name: "変ロ長調 (Bb Major)", root: 58, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "ト短調 (G Harmonic Minor)", root: 55, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            },
+            {
+                id: "F_Dm", name: "ヘ長調 & ニ短調",
+                major: { name: "ヘ長調 (F Major)", root: 53, offsets: [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24] },
+                minor: { name: "ニ短調 (D Harmonic Minor)", root: 50, offsets: [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24] }
+            }
         ];
 
-        let currentScaleId = "C";
+        let currentPairId = "C_Am";
         let audioCtx = null;
         let isPlaying = false;
         let playTimeoutId = null;
 
         const activeTitle = document.getElementById('active-title');
-        const scaleTypeTag = document.getElementById('scale-type-tag');
+        const scalePairTag = document.getElementById('scale-pair-tag');
+        const currentModeLabel = document.getElementById('current-mode-label');
         const keyboardContainer = document.getElementById('keyboard-container');
         const btnPlay = document.getElementById('btn-play');
         const btnStop = document.getElementById('btn-stop');
@@ -185,46 +224,46 @@
             osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
             gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
 
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.6);
+            osc.stop(audioCtx.currentTime + 0.5);
         }
 
-        // 1オクターブ鍵盤描画 (C4 = 60 から B4 = 71、および終点のC5 = 72)
-        function renderKeyboard(activeMidi = -1) {
+        // 2オクターブ鍵盤を描画 (C3 = 48 から C5 = 72)
+        function renderKeyboard(activeMidi = -1, scaleDataObj) {
             keyboardContainer.innerHTML = '';
-            const scaleObj = scalesData.find(s => s.id === currentScaleId);
-            // 構成音の相対半音 (0〜12)
-            const activeOffsets = scaleObj.semitones;
+            const activeNotes = scaleDataObj.offsets.map(offset => scaleDataObj.root + offset);
 
-            const startMidi = 60; // C4
-            const whiteKeyWidth = 46;
-            let whiteIndex = 0;
+            const startMidi = 48; // C3
+            const endMidi = 72;   // C5
+            const whiteKeyWidth = 38;
 
-            // 白鍵の総数カウント (C4からB4までの7白鍵 + C5)
-            const whiteMidis = [60, 62, 64, 65, 67, 69, 71, 72];
+            // 白鍵リスト生成
+            const whiteMidis = [];
+            for (let m = startMidi; m <= endMidi; m++) {
+                if (![1, 3, 6, 8, 10].includes(m % 12)) whiteMidis.push(m);
+            }
             keyboardContainer.style.width = `${whiteMidis.length * whiteKeyWidth}px`;
 
             // 白鍵描画
-            whiteMidis.forEach((m) => {
-                const offsetFromRoot = (m - startMidi);
-                const isInScale = activeOffsets.includes(offsetFromRoot) || (m === 72 && activeOffsets.includes(12));
+            whiteMidis.forEach((m, idx) => {
+                const isInScale = activeNotes.includes(m);
                 const isActivePlay = (activeMidi === m);
 
                 const key = document.createElement('div');
                 key.className = `absolute top-0 bottom-0 apple-key-white cursor-pointer transition-all duration-150 flex flex-col justify-end items-center pb-3 ${isActivePlay ? 'key-active' : isInScale ? 'bg-blue-50/90 border-blue-300' : ''}`;
-                key.style.left = `${whiteIndex * whiteKeyWidth}px`;
+                key.style.left = `${idx * whiteKeyWidth}px`;
                 key.style.width = `${whiteKeyWidth}px`;
-                key.style.height = '140px';
+                key.style.height = '130px';
                 key.style.zIndex = '1';
 
                 if (isInScale) {
                     const dot = document.createElement('div');
-                    dot.className = `w-2.5 h-2.5 rounded-full ${isActivePlay ? 'bg-white' : 'bg-blue-600 shadow-sm'}`;
+                    dot.className = `w-2 h-2 rounded-full ${isActivePlay ? 'bg-white' : 'bg-blue-600 shadow-sm'}`;
                     key.appendChild(dot);
                 }
 
@@ -232,80 +271,80 @@
                     initAudio();
                     playTone(m);
                     key.classList.add('bg-blue-200');
-                    setTimeout(() => key.classList.remove('bg-blue-200'), 250);
+                    setTimeout(() => key.classList.remove('bg-blue-200'), 200);
                 });
 
                 keyboardContainer.appendChild(key);
-                whiteIndex++;
             });
 
-            // 黒鍵描画 (C#4=61, D#4=63, F#4=66, G#4=68, A#4=70)
-            const blackKeysData = [
-                { midi: 61, leftWhiteIdx: 0 }, // C#
-                { midi: 63, leftWhiteIdx: 1 }, // D#
-                { midi: 66, leftWhiteIdx: 3 }, // F#
-                { midi: 68, leftWhiteIdx: 4 }, // G#
-                { midi: 70, leftWhiteIdx: 5 }  // A#
-            ];
+            // 黒鍵描画
+            for (let m = startMidi; m <= endMidi; m++) {
+                const isBlack = [1, 3, 6, 8, 10].includes(m % 12);
+                if (isBlack) {
+                    const isInScale = activeNotes.includes(m);
+                    const isActivePlay = (activeMidi === m);
 
-            blackKeysData.forEach((bk) => {
-                const offsetFromRoot = (bk.midi - startMidi);
-                const isInScale = activeOffsets.includes(offsetFromRoot);
-                const isActivePlay = (activeMidi === bk.midi);
-                const leftPos = ((bk.leftWhiteIdx + 1) * whiteKeyWidth) - 13;
+                    // 左側の白鍵インデックスを計算
+                    let whiteCountBefore = 0;
+                    for (let temp = startMidi; temp < m; temp++) {
+                        if (![1, 3, 6, 8, 10].includes(temp % 12)) whiteCountBefore++;
+                    }
+                    const leftPos = (whiteCountBefore * whiteKeyWidth) - 11;
 
-                const key = document.createElement('div');
-                key.className = `absolute top-0 apple-key-black cursor-pointer transition-all duration-150 flex flex-col justify-end items-center pb-2 ${isActivePlay ? 'key-active !bg-blue-400' : isInScale ? '!bg-slate-700 ring-1 ring-blue-400/60' : ''}`;
-                key.style.left = `${leftPos}px`;
-                key.style.width = '26px';
-                key.style.height = '88px';
-                key.style.zIndex = '10';
+                    const key = document.createElement('div');
+                    key.className = `absolute top-0 apple-key-black cursor-pointer transition-all duration-150 flex flex-col justify-end items-center pb-2 ${isActivePlay ? 'key-active !bg-blue-400' : isInScale ? '!bg-slate-700 ring-1 ring-blue-400/60' : ''}`;
+                    key.style.left = `${leftPos}px`;
+                    key.style.width = '22px';
+                    key.style.height = '80px';
+                    key.style.zIndex = '10';
 
-                if (isInScale) {
-                    const dot = document.createElement('div');
-                    dot.className = `w-1.5 h-1.5 rounded-full ${isActivePlay ? 'bg-white' : 'bg-blue-400 shadow'}`;
-                    key.appendChild(dot);
+                    if (isInScale) {
+                        const dot = document.createElement('div');
+                        dot.className = `w-1.5 h-1.5 rounded-full ${isActivePlay ? 'bg-white' : 'bg-blue-400 shadow'}`;
+                        key.appendChild(dot);
+                    }
+
+                    key.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        initAudio();
+                        playTone(m);
+                        key.classList.add('bg-slate-500');
+                        setTimeout(() => key.classList.remove('bg-slate-500'), 200);
+                    });
+
+                    keyboardContainer.appendChild(key);
                 }
-
-                key.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    initAudio();
-                    playTone(bk.midi);
-                    key.classList.add('bg-slate-500');
-                    setTimeout(() => key.classList.remove('bg-slate-500'), 250);
-                });
-
-                keyboardContainer.appendChild(key);
-            });
+            }
         }
 
         function updateUI() {
-            const scaleObj = scalesData.find(s => s.id === currentScaleId);
-            activeTitle.textContent = scaleObj.name;
-            scaleTypeTag.textContent = scaleObj.type === 'major' ? 'Major Scale' : 'Harmonic Minor';
-            renderKeyboard(-1);
+            const pairObj = scalePairs.find(p => p.id === currentPairId);
+            activeTitle.textContent = `${pairObj.major.name} & ${pairObj.minor.name}`;
+            scalePairTag.textContent = "平行調セット";
+            currentModeLabel.textContent = pairObj.major.name;
+            renderKeyboard(-1, pairObj.major);
             initGrid();
         }
 
         function initGrid() {
             scaleGrid.innerHTML = '';
-            scalesData.forEach(item => {
-                const isSelected = item.id === currentScaleId;
+            scalePairs.forEach(pair => {
+                const isSelected = pair.id === currentPairId;
                 const card = document.createElement('div');
                 card.className = `p-4 rounded-2xl transition cursor-pointer flex items-center justify-between border ${isSelected ? 'bg-blue-50/60 border-blue-500 shadow-sm' : 'glass-panel hover:border-gray-300'}`;
                 card.innerHTML = `
                     <div>
-                        <div class="text-xs font-semibold text-gray-900">${item.name}</div>
-                        <div class="text-[10px] text-gray-400 mt-0.5">${item.type === 'major' ? '長調' : '和声短音階'}</div>
+                        <div class="text-xs font-semibold text-gray-900">${pair.name}</div>
+                        <div class="text-[10px] text-gray-400 mt-0.5">長調 &amp; 和声短音階</div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="event.stopPropagation(); playDirect('${item.id}')" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 flex items-center justify-center transition shadow-2xs cursor-pointer">
+                        <button onclick="event.stopPropagation(); playDirect('${pair.id}')" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 flex items-center justify-center transition shadow-2xs cursor-pointer">
                             <i data-lucide="play" class="w-3.5 h-3.5 fill-current ml-0.5"></i>
                         </button>
                     </div>
                 `;
                 card.addEventListener('click', () => {
-                    currentScaleId = item.id;
+                    currentPairId = pair.id;
                     updateUI();
                 });
                 scaleGrid.appendChild(card);
@@ -313,37 +352,56 @@
             lucide.createIcons();
         }
 
-        window.playDirect = function(scaleId) {
+        window.playDirect = function(pairId) {
             initAudio();
-            currentScaleId = scaleId;
+            currentPairId = pairId;
             updateUI();
             startPlay();
         };
 
+        // 長調 → 短調の順番で2オクターブ連続再生
         function startPlay() {
             initAudio();
             if (isPlaying) return;
-            const scaleObj = scalesData.find(s => s.id === currentScaleId);
-            // 演奏用のMIDIノート配列生成 (C4 = 60基点)
-            const notes = scaleObj.semitones.map(semi => 60 + semi);
+            const pairObj = scalePairs.find(p => p.id === currentPairId);
 
             isPlaying = true;
             btnPlay.classList.add('hidden');
             btnStop.classList.remove('hidden');
 
+            // まず長調を再生
+            currentModeLabel.textContent = `${pairObj.major.name} (再生中...)`;
+            const majorNotes = pairObj.major.offsets.map(offset => pairObj.major.root + offset);
+            
             let idx = 0;
-            function step() {
+            function stepMajor() {
                 if (!isPlaying) return;
-                if (idx < notes.length) {
-                    playTone(notes[idx]);
-                    renderKeyboard(notes[idx]);
+                if (idx < majorNotes.length) {
+                    playTone(majorNotes[idx]);
+                    renderKeyboard(majorNotes[idx], pairObj.major);
                     idx++;
-                    playTimeoutId = setTimeout(step, 320);
+                    playTimeoutId = setTimeout(stepMajor, 220);
                 } else {
-                    stopPlay();
+                    // 続いて短調を再生
+                    currentModeLabel.textContent = `${pairObj.minor.name} (再生中...)`;
+                    const minorNotes = pairObj.minor.offsets.map(offset => pairObj.minor.root + offset);
+                    let idxMinor = 0;
+                    
+                    function stepMinor() {
+                        if (!isPlaying) return;
+                        if (idxMinor < minorNotes.length) {
+                            playTone(minorNotes[idxMinor]);
+                            renderKeyboard(minorNotes[idxMinor], pairObj.minor);
+                            idxMinor++;
+                            playTimeoutId = setTimeout(stepMinor, 220);
+                        } else {
+                            stopPlay();
+                        }
+                    }
+                    setTimeout(stepMinor, 300);
                 }
             }
-            step();
+            stepMajor();
         }
 
         function stopPlay() {
@@ -351,13 +409,15 @@
             if (playTimeoutId) clearTimeout(playTimeoutId);
             btnPlay.classList.remove('hidden');
             btnStop.classList.add('hidden');
-            renderKeyboard(-1);
+            const pairObj = scalePairs.find(p => p.id === currentPairId);
+            currentModeLabel.textContent = pairObj.major.name;
+            renderKeyboard(-1, pairObj.major);
         }
 
         btnPlay.addEventListener('click', startPlay);
         btnStop.addEventListener('click', stopPlay);
 
-        // 初期化実行
+        // 初期化
         initGrid();
         updateUI();
     </script>
