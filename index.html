@@ -78,7 +78,7 @@
                     <span id="current-hand-badge" class="bg-slate-100 text-slate-700 font-semibold px-2 py-1 rounded-md">右手フィンガリング</span>
                 </div>
                 <div class="text-slate-400">
-                    💡 鍵盤をタップすると単音確認ができます。下のリストから直接再生も可能です。
+                    💡 まず最初に「音声ONにする」を押してください。鍵盤タップで単音確認もできます。
                 </div>
             </div>
         </section>
@@ -124,89 +124,62 @@
         // Lucideアイコンの初期化
         lucide.createIcons();
 
-        // --- データの定義 (全音ハノン第39番 準拠の全24調：短調は和声短音階) ---
+        // データの定義 (全音ハノン第39番 準拠の全24調：短調は和声短音階)
         const scalesData = [
-            // 長調 (Major)
             { id: "C", name: "ハ長調 (C Major)", root: 48, type: "major",
-              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], 
-              lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
+              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
             { id: "Am", name: "イ短調 (A Harmonic Minor)", root: 57, type: "harmonic_minor",
-              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], 
-              lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
+              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
             { id: "F", name: "ヘ長調 (F Major)", root: 53, type: "major",
-              rh: [1,2,3,4,1,2,3, 1,2,3,4,1,2,3, 4], 
-              lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
+              rh: [1,2,3,4,1,2,3, 1,2,3,4,1,2,3, 4], lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
             { id: "Dm", name: "ニ短調 (D Harmonic Minor)", root: 50, type: "harmonic_minor",
-              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], 
-              lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
+              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
             { id: "Bb", name: "変ロ長調 (Bb Major)", root: 58, type: "major",
-              rh: [2,1,2,3,1,2,3, 4,1,2,3,1,2,3,4], 
-              lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
+              rh: [2,1,2,3,1,2,3, 4,1,2,3,1,2,3,4], lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
             { id: "Gm", name: "ト短調 (G Harmonic Minor)", root: 55, type: "harmonic_minor",
-              rh: [1,2,3,4,1,2,3, 1,2,3,4,1,2,3, 4], 
-              lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
+              rh: [1,2,3,4,1,2,3, 1,2,3,4,1,2,3, 4], lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
             { id: "Eb", name: "変ホ長調 (Eb Major)", root: 51, type: "major",
-              rh: [2,1,2,3,4,1,2, 3,4,1,2,3,4,1, 2], 
-              lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
+              rh: [2,1,2,3,4,1,2, 3,4,1,2,3,4,1, 2], lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
             { id: "Cm", name: "ハ短調 (C Harmonic Minor)", root: 48, type: "harmonic_minor",
-              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], 
-              lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
+              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
             { id: "Ab", name: "変イ長調 (Ab Major)", root: 56, type: "major",
-              rh: [2,3,1,2,3,1,2, 3,1,2,3,1,2,3, 4], 
-              lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
+              rh: [2,3,1,2,3,1,2, 3,1,2,3,1,2,3, 4], lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
             { id: "Fm", name: "ヘ短調 (F Harmonic Minor)", root: 53, type: "harmonic_minor",
-              rh: [1,2,3,4,1,2,3, 1,2,3,4,1,2,3, 4], 
-              lh: [4,3,2,1,3,2,1, 4,3,2,1,3,2,1, 4] },
+              rh: [1,2,3,4,1,2,3, 1,2,3,4,1,2,3, 4], lh: [4,3,2,1,3,2,1, 4,3,2,1,3,2,1, 4] },
             { id: "Db", name: "変ニ長調 (Db Major)", root: 49, type: "major",
-              rh: [2,3,1,2,3,4,1, 2,3,1,2,3,4,1, 2], 
-              lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
+              rh: [2,3,1,2,3,4,1, 2,3,1,2,3,4,1, 2], lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
             { id: "Bbm", name: "変ロ短調 (Bb Harmonic Minor)", root: 58, type: "harmonic_minor",
-              rh: [2,1,2,3,1,2,3, 4,1,2,3,1,2,3, 4], 
-              lh: [2,1,3,2,1,4,3, 2,1,3,2,1,4,3, 2] },
+              rh: [2,1,2,3,1,2,3, 4,1,2,3,1,2,3, 4], lh: [2,1,3,2,1,4,3, 2,1,3,2,1,4,3, 2] },
             { id: "F#", name: "嬰ヘ長調 (F# Major)", root: 54, type: "major",
-              rh: [2,3,4,1,2,3,1, 2,3,4,1,2,3,1, 2], 
-              lh: [4,3,2,1,3,2,1, 4,3,2,1,3,2,1, 4] },
+              rh: [2,3,4,1,2,3,1, 2,3,4,1,2,3,1, 2], lh: [4,3,2,1,3,2,1, 4,3,2,1,3,2,1, 4] },
             { id: "Dbm", name: "嬰ハ短調 (C# Harmonic Minor)", root: 49, type: "harmonic_minor",
-              rh: [2,3,1,2,3,1,2, 3,1,2,3,1,2,3, 4], 
-              lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
+              rh: [2,3,1,2,3,1,2, 3,1,2,3,1,2,3, 4], lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
             { id: "B", name: "ロ長調 (B Major)", root: 59, type: "major",
-              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], 
-              lh: [4,3,2,1,4,3,2, 1,4,3,2,1,4,3, 2] },
+              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], lh: [4,3,2,1,4,3,2, 1,4,3,2,1,4,3, 2] },
             { id: "G#m", name: "嬰ト短調 (G# Harmonic Minor)", root: 56, type: "harmonic_minor",
-              rh: [2,3,1,2,3,1,3, 2,3,1,2,3,1,3, 4], 
-              lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
+              rh: [2,3,1,2,3,1,3, 2,3,1,2,3,1,3, 4], lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
             { id: "E", name: "ホ長調 (E Major)", root: 52, type: "major",
-              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], 
-              lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
+              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
             { id: "C#m", name: "嬰ハ短調(C#m Harmonic)", root: 49, type: "harmonic_minor",
-              rh: [2,3,1,2,3,1,2, 3,1,2,3,1,2,3, 4], 
-              lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
+              rh: [2,3,1,2,3,1,2, 3,1,2,3,1,2,3, 4], lh: [3,2,1,4,3,2,1, 3,2,1,4,3,2,1, 3] },
             { id: "A", name: "イ長調 (A Major)", root: 57, type: "major",
-              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], 
-              lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
+              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
             { id: "F#m", name: "嬰ヘ短調 (F# Harmonic Minor)", root: 54, type: "harmonic_minor",
-              rh: [2,3,1,2,3,1,2, 3,4,1,2,3,1,2, 3], 
-              lh: [4,3,2,1,3,2,1, 4,3,2,1,3,2,1, 4] },
+              rh: [2,3,1,2,3,1,2, 3,4,1,2,3,1,2, 3], lh: [4,3,2,1,3,2,1, 4,3,2,1,3,2,1, 4] },
             { id: "D", name: "ニ長調 (D Major)", root: 50, type: "major",
-              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], 
-              lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
+              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
             { id: "Bm", name: "ロ短調 (B Harmonic Minor)", root: 59, type: "harmonic_minor",
-              rh: [1,2,3,1,2,3,4, 3,2,1,4,3,2,1, 3], 
-              lh: [4,3,2,1,4,3,2, 1,4,3,2,1,4,3, 2] },
+              rh: [1,2,3,1,2,3,4, 3,2,1,4,3,2,1, 3], lh: [4,3,2,1,4,3,2, 1,4,3,2,1,4,3, 2] },
             { id: "G", name: "ト長調 (G Major)", root: 55, type: "major",
-              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], 
-              lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
+              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] },
             { id: "Em", name: "ホ短調 (E Harmonic Minor)", root: 52, type: "harmonic_minor",
-              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], 
-              lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] }
+              rh: [1,2,3,1,2,3,4, 1,2,3,1,2,3,4, 5], lh: [5,4,3,2,1,3,2, 1,4,3,2,1,3,2, 1] }
         ];
 
-        // 各スケールの半音ステップ（メジャー or 和声短音階）
         function getScaleOffsets(type) {
             if (type === 'major') {
                 return [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24];
             } else {
-                // 和声短音階 (Harmonic Minor: 全・半・全・全・半・増2度(3半音)・半)
                 return [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 23, 24];
             }
         }
@@ -217,7 +190,6 @@
         let isPlaying = false;
         let playTimeoutId = null;
 
-        // DOM要素
         const scaleSelect = document.getElementById('scale-select');
         const handRhBtn = document.getElementById('hand-rh');
         const handLhBtn = document.getElementById('hand-lh');
@@ -229,8 +201,8 @@
         const btnAudioInit = document.getElementById('btn-audio-init');
         const scaleListGrid = document.getElementById('scale-list-grid');
 
-        // 音声初期化
-        btnAudioInit.addEventListener('click', () => {
+        // 音声初期化・有効化
+        function initAudioContext() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
@@ -238,9 +210,11 @@
                 audioCtx.resume();
             }
             btnAudioInit.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-emerald-300"></i> 音声準備OK';
-            btnAudioInit.classList.add('bg-emerald-700');
+            btnAudioInit.className = "bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm";
             lucide.createIcons();
-        });
+        }
+
+        btnAudioInit.addEventListener('click', initAudioContext);
 
         function playTone(midiNote) {
             if (!audioCtx) {
@@ -249,6 +223,7 @@
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
+
             const freq = 440 * Math.pow(2, (midiNote - 69) / 12);
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -266,7 +241,6 @@
             osc.stop(audioCtx.currentTime + 0.8);
         }
 
-        // セレクトボックス初期化
         function initSelect() {
             scaleSelect.innerHTML = '';
             scalesData.forEach(item => {
@@ -278,7 +252,6 @@
             scaleSelect.value = currentScaleId;
         }
 
-        // ダイレクト試聴リスト初期化
         function initScaleList() {
             scaleListGrid.innerHTML = '';
             scalesData.forEach(item => {
@@ -289,7 +262,7 @@
                         <div class="text-xs font-bold text-slate-700 truncate">${item.name}</div>
                         <div class="text-[10px] text-slate-400">2オクターブスケール</div>
                     </div>
-                    <button onclick="previewScale('${item.id}')" class="bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white p-2 rounded-lg transition shrink-0" title="試聴する">
+                    <button type="button" onclick="previewScale('${item.id}')" class="bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white p-2 rounded-lg transition shrink-0 cursor-pointer" title="試聴する">
                         <i data-lucide="play" class="w-3.5 h-3.5"></i>
                     </button>
                 `;
@@ -298,7 +271,6 @@
             lucide.createIcons();
         }
 
-        // 鍵盤描画 (C3 = 48 から C6 = 84 まで、全37鍵)
         function renderKeyboard(activeNoteIndex = -1) {
             keyboardContainer.innerHTML = '';
             const scaleObj = scalesData.find(s => s.id === currentScaleId);
@@ -306,7 +278,6 @@
             const root = scaleObj.root;
             const handFingers = scaleObj[currentHand];
 
-            // ノートごとの指番号マップを作成
             const noteFingerMap = {};
             offsets.forEach((offset, idx) => {
                 const note = root + offset;
@@ -318,7 +289,6 @@
             const startMidi = 48; // C3
             const endMidi = 84;   // C6
 
-            // 白鍵のリストを作成
             const whiteKeys = [];
             for (let m = startMidi; m <= endMidi; m++) {
                 const noteInOctave = m % 12;
@@ -326,7 +296,7 @@
                 if (!isBlack) whiteKeys.push(m);
             }
 
-            const whiteKeyWidth = 44; // px
+            const whiteKeyWidth = 44;
             let whiteIndex = 0;
 
             for (let m = startMidi; m <= endMidi; m++) {
@@ -336,7 +306,6 @@
                 const isActive = (activeNoteIndex !== -1 && offsets[activeNoteIndex] + root === m);
 
                 if (!isBlack) {
-                    // 白鍵
                     const keyEl = document.createElement('div');
                     keyEl.className = `absolute top-0 bottom-0 white-key rounded-b-lg flex flex-col justify-end items-center pb-3 cursor-pointer transition ${isActive ? 'key-active-play' : ''}`;
                     keyEl.style.left = `${whiteIndex * whiteKeyWidth}px`;
@@ -352,6 +321,7 @@
                     }
 
                     keyEl.addEventListener('click', () => {
+                        initAudioContext();
                         playTone(m);
                         keyEl.classList.add('bg-sky-200');
                         setTimeout(() => keyEl.classList.remove('bg-sky-200'), 300);
@@ -362,10 +332,8 @@
                 }
             }
 
-            // コンテナ全体の幅を調整
             keyboardContainer.style.width = `${whiteIndex * whiteKeyWidth}px`;
 
-            // 黒鍵の配置
             whiteIndex = 0;
             for (let m = startMidi; m <= endMidi; m++) {
                 const noteInOctave = m % 12;
@@ -393,6 +361,7 @@
 
                     keyEl.addEventListener('click', (e) => {
                         e.stopPropagation();
+                        initAudioContext();
                         playTone(m);
                         keyEl.classList.add('bg-slate-700');
                         setTimeout(() => keyEl.classList.remove('bg-slate-700'), 300);
@@ -403,7 +372,6 @@
             }
         }
 
-        // 状態更新と再描画
         function updateView() {
             const scaleObj = scalesData.find(s => s.id === currentScaleId);
             currentScaleBadge.textContent = scaleObj.name;
@@ -420,8 +388,8 @@
             renderKeyboard(-1);
         }
 
-        // スケール自動再生
         function startAutoPlay() {
+            initAudioContext();
             if (isPlaying) return;
             const scaleObj = scalesData.find(s => s.id === currentScaleId);
             const offsets = getScaleOffsets(scaleObj.type);
@@ -455,15 +423,14 @@
             renderKeyboard(-1);
         }
 
-        // ダイレクト試聴（リストから即再生）
         window.previewScale = function(scaleId) {
+            initAudioContext();
             scaleSelect.value = scaleId;
             currentScaleId = scaleId;
             updateView();
             startAutoPlay();
         };
 
-        // イベントリスナー設定
         scaleSelect.addEventListener('change', (e) => {
             currentScaleId = e.target.value;
             updateView();
@@ -482,7 +449,6 @@
         btnPlay.addEventListener('click', startAutoPlay);
         btnStop.addEventListener('click', stopAutoPlay);
 
-        // 初期化実行
         initSelect();
         initScaleList();
         updateView();
