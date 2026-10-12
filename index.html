@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全音ハノン 第39番 運指ビジュアライザー (4オクターブ対応)</title>
+    <title>全音ハノン 運指ビジュアライザー (4オクターブ対応)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -47,7 +47,7 @@
                 <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                     <div class="flex items-center gap-2">
                         <label for="mode-select" class="font-bold text-sm text-slate-700 whitespace-nowrap">種類:</label>
-                        <select id="mode-select" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <select id="mode-select" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                             <option value="scale">音階 (スケール)</option>
                             <option value="arpeggio">分散和音 (アルペジオ)</option>
                         </select>
@@ -55,7 +55,7 @@
 
                     <div class="flex items-center gap-2 flex-1 min-w-[200px]">
                         <label for="scale-select" class="font-bold text-sm text-slate-700 whitespace-nowrap">調:</label>
-                        <select id="scale-select" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <select id="scale-select" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                             <!-- JSで動的生成 -->
                         </select>
                     </div>
@@ -103,9 +103,9 @@
                 <span class="text-xs text-slate-400">横スクロールで全体を表示</span>
             </div>
 
-            <!-- スクロール可能な鍵盤コンテナ (4オクターブ分広めに確保) -->
+            <!-- スクロール可能な鍵盤コンテナ (4オクターブ対応：C3=48 から C7=96) -->
             <div class="overflow-x-auto pb-4 pt-2">
-                <div id="keyboard-container" class="relative inline-flex min-w-[1700px] h-48 select-none bg-slate-900 p-2 rounded-xl shadow-inner">
+                <div id="keyboard-container" class="relative inline-block h-48 select-none bg-slate-900 p-2 rounded-xl shadow-inner">
                     <!-- キーボード要素がJSでここに描画されます -->
                 </div>
             </div>
@@ -133,7 +133,7 @@
     <script>
         lucide.createIcons();
 
-        // 24調データ（スケールおよびアルペジオのルート、種別、1オクターブ分のパターン）
+        // 24調データ定義
         const scalesData = [
             { id: "C", name: "ハ長調 (C Major)", root: 48, type: "major",
               rh: [1,2,3,1,2,3,4], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
@@ -185,7 +185,7 @@
               rh: [1,2,3,1,2,3,4], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] }
         ];
 
-        // 4オクターブ分のノートオフセットおよび指番号を生成する関数
+        // 4オクターブ分のオフセットと指番号を生成
         function generate4OctaveData(scaleObj, mode, hand) {
             let baseOffsets = [];
             let patternFingers = [];
@@ -198,15 +198,7 @@
                 }
                 patternFingers = scaleObj[hand];
             } else {
-                // アルペジオ（主和音の3度堆積：ルート、3度、5度、オクターブ）
-                if (scaleObj.type === 'major') {
-                    // メジャー三和音
-                    const third = (scaleObj.id === 'F' || scaleObj.id === 'Bb' || scaleObj.id === 'Eb' || scaleObj.id === 'Ab' || scaleObj.id === 'Db' || scaleObj.id === 'F#') && scaleObj.id !== 'C' && scaleObj.id !== 'G' && scaleObj.id !== 'D' && scaleObj.id !== 'A' && scaleObj.id !== 'E' && scaleObj.id !== 'B' ? 3 : 4;
-                    // 簡易的に調に応じたコード構成音
-                    baseOffsets = [0, scaleObj.type.includes('m') || scaleObj.id.includes('m') ? 3 : 4, 7, 12];
-                } else {
-                    baseOffsets = [0, 3, 7, 12];
-                }
+                baseOffsets = [0, 4, 7, 12];
                 patternFingers = hand === 'rh' ? scaleObj.arpRh : scaleObj.arpLh;
             }
 
@@ -214,57 +206,23 @@
             let fingers = [];
 
             if (mode === 'scale') {
-                // 4オクターブ分 (0〜4オクターブ + 最後の主音)
-                for (let oct = 0; oct < 4; oct++) {
-                    for (let i = 0; i < baseOffsets.length; i++) {
-                        offsets.push(baseOffsets[i] + (oct * 12));
-                        fingers.push(patternFingers[i % patternFingers.length]);
-                    }
-                }
-                // 最後の最高音
-                offsets.push(48); // 4オクターブ上のC相当など
-                // 正確な終点
-                const lastOffset = offsets[offsets.length - 2] + (scaleObj.type === 'major' ? 2 : 1); // 調整
-                // 代わりに綺麗に4オクターブ分 (+48 semitones)
-                offsets[offsets.length - 1] = 48; // 再計算用に下で処理
-                
-                // 4オクターブ分の正確な配列構築
-                offsets = [];
-                fingers = [];
-                for (let oct = 0; oct < 4; oct++) {
-                    for (let i = 0; i < baseOffsets.length; i++) {
-                        offsets.push(baseOffsets[i] + (oct * 12));
-                        fingers.push(patternFingers[i % patternFingers.length]);
-                    }
-                }
-                offsets.push(48); // 4オクターブ上のルート
-                fingers.push(hand === 'rh' ? 5 : 1);
-            } else {
-                // アルペジオ4オクターブ
-                for (let oct = 0; oct < 4; oct++) {
-                    for (let i = 0; i < baseOffsets.length - 1; i++) {
-                        offsets.push(baseOffsets[i] + (oct * 12));
-                        fingers.push(patternFingers[i % patternFingers.length]);
-                    }
-                }
-                // 4オクターブ上の終点
-                offsets.push(48);
-                fingers.push(hand === 'rh' ? 5 : 1);
-                // 48の代わりに4オクターブ上の正確な値
-                offsets[offsets.length - 1] = 48 + 36; // 4 octaves = 48 semitones
-            }
-
-            // スケールの場合の正確な4オクターブ + 終点
-            if (mode === 'scale') {
-                offsets = [];
-                fingers = [];
                 for (let oct = 0; oct < 4; oct++) {
                     for (let i = 0; i < 7; i++) {
                         offsets.push(baseOffsets[i] + (oct * 12));
                         fingers.push(patternFingers[i % patternFingers.length]);
                     }
                 }
-                offsets.push(48); // 4オクターブ上の主音
+                // 4オクターブ上の主音（終点）
+                offsets.push(48); // 4オクターブ分 = 48半音
+                fingers.push(hand === 'rh' ? 5 : 1);
+            } else {
+                for (let oct = 0; oct < 4; oct++) {
+                    for (let i = 0; i < 3; i++) {
+                        offsets.push(baseOffsets[i] + (oct * 12));
+                        fingers.push(patternFingers[i % patternFingers.length]);
+                    }
+                }
+                offsets.push(48);
                 fingers.push(hand === 'rh' ? 5 : 1);
             }
 
@@ -359,7 +317,7 @@
             lucide.createIcons();
         }
 
-        // 鍵盤描画 (C3 = 48 から C7 = 96 まで、全49鍵・4オクターブ)
+        // 4オクターブ鍵盤描画 (C3 = 48 から C7 = 96)
         function renderKeyboard(activeNoteIndex = -1) {
             keyboardContainer.innerHTML = '';
             const scaleObj = scalesData.find(s => s.id === currentScaleId);
@@ -375,12 +333,20 @@
             });
 
             const startMidi = 48; // C3
-            const endMidi = 96;   // C7 (4オクターブ分)
-
-            const whiteKeyWidth = 36; // px (4オクターブ分収めるため少しコンパクト化)
+            const endMidi = 96;   // C7
+            const whiteKeyWidth = 36; // px
             let whiteIndex = 0;
 
-            // 白鍵描画
+            // 白鍵カウント・描画
+            for (let m = startMidi; m <= endMidi; m++) {
+                const noteInOctave = m % 12;
+                const isBlack = [1, 3, 6, 8, 10].includes(noteInOctave);
+                if (!isBlack) whiteIndex++;
+            }
+            const totalWhiteKeys = whiteIndex;
+            keyboardContainer.style.width = `${totalWhiteKeys * whiteKeyWidth}px`;
+
+            whiteIndex = 0;
             for (let m = startMidi; m <= endMidi; m++) {
                 const noteInOctave = m % 12;
                 const isBlack = [1, 3, 6, 8, 10].includes(noteInOctave);
@@ -413,8 +379,6 @@
                     whiteIndex++;
                 }
             }
-
-            keyboardContainer.style.width = `${whiteIndex * whiteKeyWidth}px`;
 
             // 黒鍵描画
             whiteIndex = 0;
@@ -491,7 +455,7 @@
                     playTone(midiNote);
                     renderKeyboard(index);
                     index++;
-                    playTimeoutId = setTimeout(step, 280);
+                    playTimeoutId = setTimeout(step, 250);
                 } else {
                     stopAutoPlay();
                 }
