@@ -3,264 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全音ハノン 運指ビジュアライザー (4オクターブ対応)</title>
+    <title>Hanon Scale &amp; Chord Player</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .white-key { background-color: #ffffff; border: 1px solid #cbd5e1; }
-        .black-key { background-color: #1e293b; color: #ffffff; }
-        .key-active-play { background-color: #38bdf8 !important; border-color: #0284c7 !important; color: #ffffff !important; }
+        @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Helvetica Neue", Arial, sans-serif;
+            background-color: #fbfbfd;
+            color: #1d1d1f;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+        .apple-key-white {
+            background-color: #ffffff;
+            border: 1px solid #d2d2d7;
+            border-radius: 0 0 6px 6px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .apple-key-black {
+            background-color: #1d1d1f;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .key-active {
+            background: linear-gradient(135deg, #0071e3, #409cff) !important;
+            border-color: #0071e3 !important;
+            box-shadow: 0 0 12px rgba(0, 113, 227, 0.4) !important;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col antialiased selection:bg-blue-500 selection:text-white">
 
-    <!-- ヘッダー -->
-    <header class="bg-indigo-900 text-white shadow-md py-4 px-6">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div>
-                <h1 class="text-xl font-bold flex items-center gap-2">
-                    <i data-lucide="music" class="w-6 h-6 text-indigo-300"></i>
-                    全音ハノン 運指ビジュアライザー (4オクターブ)
-                </h1>
-                <p class="text-xs text-indigo-200 mt-0.5">スケール &amp; アルペジオ全24調対応・4オクターブ運指確認＆試聴ツール</p>
+    <!-- Apple風トップナビゲーション -->
+    <header class="glass-panel sticky top-0 z-50 px-6 py-4 border-b border-gray-200/60">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm">
+                    <i data-lucide="music" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm font-semibold tracking-tight text-gray-900">Hanon Notes</h1>
+                    <p class="text-[11px] text-gray-500">全24調 1オクターブ構成音ビジュアライザー</p>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button id="btn-audio-init" class="bg-indigo-700 hover:bg-indigo-600 text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-                    <i data-lucide="volume-2" class="w-4 h-4"></i> 音声ONにする
-                </button>
-            </div>
+            <button id="btn-audio-init" class="bg-gray-900 hover:bg-black text-white text-xs font-medium px-4 py-2 rounded-full transition shadow-sm cursor-pointer flex items-center gap-1.5">
+                <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 音声を有効にする
+            </button>
         </div>
     </header>
 
     <!-- メインコンテンツ -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    <main class="flex-1 max-w-4xl w-full mx-auto p-6 space-y-6">
 
-        <!-- コントロール・調選択カード -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                
-                <!-- 調選択セレクト & モード切替 -->
-                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                    <div class="flex items-center gap-2">
-                        <label for="mode-select" class="font-bold text-sm text-slate-700 whitespace-nowrap">種類:</label>
-                        <select id="mode-select" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                            <option value="scale">音階 (スケール)</option>
-                            <option value="arpeggio">分散和音 (アルペジオ)</option>
-                        </select>
-                    </div>
-
-                    <div class="flex items-center gap-2 flex-1 min-w-[200px]">
-                        <label for="scale-select" class="font-bold text-sm text-slate-700 whitespace-nowrap">調:</label>
-                        <select id="scale-select" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                            <!-- JSで動的生成 -->
-                        </select>
-                    </div>
+        <!-- ヒーロー・プレイヤーカード -->
+        <section class="glass-panel rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-200/60 space-y-6">
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <span id="scale-type-tag" class="text-[11px] font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Major Scale</span>
+                    <h2 id="active-title" class="text-2xl font-bold tracking-tight text-gray-900 mt-2">ハ長調 (C Major)</h2>
                 </div>
 
-                <!-- 左右ハンド・アクションボタン -->
-                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
-                    <!-- 左右切り替えタブ -->
-                    <div class="bg-slate-100 p-1 rounded-xl flex gap-1 border border-slate-200">
-                        <button id="hand-rh" class="px-4 py-1.5 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow-sm cursor-pointer">右手 (RH)</button>
-                        <button id="hand-lh" class="px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 cursor-pointer">左手 (LH)</button>
-                    </div>
-
-                    <!-- 再生コントロール -->
-                    <div class="flex items-center gap-2">
-                        <button id="btn-play" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-                            <i data-lucide="play" class="w-4 h-4"></i> 4オクターブ自動再生
-                        </button>
-                        <button id="btn-stop" class="bg-rose-500 hover:bg-rose-400 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm hidden cursor-pointer">
-                            <i data-lucide="square" class="w-4 h-4"></i> 停止
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 現在選択中の情報表示 -->
-            <div class="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
                 <div class="flex items-center gap-2">
-                    <span id="current-scale-badge" class="bg-indigo-100 text-indigo-800 font-bold px-2.5 py-1 rounded-md text-xs">ハ長調 (C Major) スケール</span>
-                    <span id="current-hand-badge" class="bg-slate-100 text-slate-700 font-semibold px-2 py-1 rounded-md">右手フィンガリング</span>
-                </div>
-                <div class="text-slate-400">
-                    💡 4オクターブ（C3〜C7）の全域を横スクロールで確認・試聴できます。
+                    <button id="btn-play" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-5 py-2.5 rounded-full transition shadow-sm flex items-center gap-2 cursor-pointer">
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i> 試聴する
+                    </button>
+                    <button id="btn-stop" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-medium px-4 py-2.5 rounded-full transition hidden flex items-center gap-2 cursor-pointer">
+                        <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i> 停止
+                    </button>
                 </div>
             </div>
+
+            <!-- 1オクターブ鍵盤コンテナ (C4 〜 C5) -->
+            <div class="pt-4 pb-2">
+                <div class="text-[11px] font-medium text-gray-400 mb-2 uppercase tracking-wider">1オクターブ構成音 (C4 - C5)</div>
+                <div class="overflow-x-auto pb-2">
+                    <div id="keyboard-container" class="relative inline-flex h-40 bg-gray-100 p-2 rounded-2xl shadow-inner min-w-[500px]">
+                        <!-- 鍵盤がここに描画されます -->
+                    </div>
+                </div>
+            </div>
+
         </section>
 
-        <!-- 4オクターブ運指マップ (C3〜C7) -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 overflow-hidden">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-                    <i data-lucide="sliders" class="w-4 h-4 text-indigo-600"></i>
-                    4オクターブ運指マップ (C3 〜 C7)
-                </h2>
-                <span class="text-xs text-slate-400">横スクロールで全体を表示</span>
-            </div>
-
-            <!-- スクロール可能な鍵盤コンテナ (4オクターブ対応：C3=48 から C7=96) -->
-            <div class="overflow-x-auto pb-4 pt-2">
-                <div id="keyboard-container" class="relative inline-block h-48 select-none bg-slate-900 p-2 rounded-xl shadow-inner">
-                    <!-- キーボード要素がJSでここに描画されます -->
-                </div>
-            </div>
-        </section>
-
-        <!-- 全24調 ダイレクト試聴＆リストセクション -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-            <h2 class="text-sm font-bold text-slate-700 flex items-center gap-2 mb-4">
-                <i data-lucide="list-music" class="w-4 h-4 text-indigo-600"></i>
-                全24調 ダイレクト試聴リスト
-            </h2>
-            <div id="scale-list-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                <!-- JSで各調カードを自動生成 -->
+        <!-- 全24調 リストグリッド -->
+        <section class="space-y-3">
+            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-1">すべての調を選択・再生</h3>
+            <div id="scale-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <!-- 調カードが自動生成されます -->
             </div>
         </section>
 
     </main>
 
     <!-- フッター -->
-    <footer class="text-center py-6 text-xs text-slate-400 border-t border-slate-200 mt-auto">
-        全音ハノンピアノ教本（24の調の音階・分散和音）準拠 ｜ 4オクターブ運指ビジュアライザー
+    <footer class="text-center py-8 text-xs text-gray-400 border-t border-gray-200/40">
+        Minimalist Hanon Visualizer ｜ Designed for Focus &amp; Clarity
     </footer>
 
     <!-- スクリプト部 -->
     <script>
         lucide.createIcons();
 
-        // 24調データ定義
+        // 全24調データ（1オクターブ分の構成音：長調 ＆ 和声短音階）
         const scalesData = [
-            { id: "C", name: "ハ長調 (C Major)", root: 48, type: "major",
-              rh: [1,2,3,1,2,3,4], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "Am", name: "イ短調 (A Harmonic Minor)", root: 57, type: "harmonic_minor",
-              rh: [1,2,3,1,2,3,4], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "F", name: "ヘ長調 (F Major)", root: 53, type: "major",
-              rh: [1,2,3,4,1,2,3], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "Dm", name: "ニ短調 (D Harmonic Minor)", root: 50, type: "harmonic_minor",
-              rh: [1,2,3,1,2,3,4], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "Bb", name: "変ロ長調 (Bb Major)", root: 58, type: "major",
-              rh: [2,1,2,3,1,2,3], lh: [3,2,1,4,3,2,1], arpRh: [2,1,2,4], arpLh: [4,2,1,3] },
-            { id: "Gm", name: "ト短調 (G Harmonic Minor)", root: 55, type: "harmonic_minor",
-              rh: [1,2,3,4,1,2,3], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "Eb", name: "変ホ長調 (Eb Major)", root: 51, type: "major",
-              rh: [2,1,2,3,4,1,2], lh: [3,2,1,4,3,2,1], arpRh: [2,3,1,2], arpLh: [1,2,4,1] },
-            { id: "Cm", name: "ハ短調 (C Harmonic Minor)", root: 48, type: "harmonic_minor",
-              rh: [1,2,3,1,2,3,4], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "Ab", name: "変イ長調 (Ab Major)", root: 56, type: "major",
-              rh: [2,3,1,2,3,1,2], lh: [3,2,1,4,3,2,1], arpRh: [3,4,1,2], arpLh: [2,1,4,2] },
-            { id: "Fm", name: "ヘ短調 (F Harmonic Minor)", root: 53, type: "harmonic_minor",
-              rh: [1,2,3,4,1,2,3], lh: [4,3,2,1,3,2,1], arpRh: [1,2,4,1], arpLh: [4,2,1,3] },
-            { id: "Db", name: "変ニ長調 (Db Major)", root: 49, type: "major",
-              rh: [2,3,1,2,3,4,1], lh: [3,2,1,4,3,2,1], arpRh: [2,3,1,2], arpLh: [3,2,1,3] },
-            { id: "Bbm", name: "変ロ短調 (Bb Harmonic Minor)", root: 58, type: "harmonic_minor",
-              rh: [2,1,2,3,1,2,3], lh: [2,1,3,2,1,4,3], arpRh: [2,1,2,4], arpLh: [3,2,1,3] },
-            { id: "F#", name: "嬰ヘ長調 (F# Major)", root: 54, type: "major",
-              rh: [2,3,4,1,2,3,1], lh: [4,3,2,1,3,2,1], arpRh: [2,3,1,2], arpLh: [3,2,1,3] },
-            { id: "Dbm", name: "嬰ハ短調 (C# Harmonic Minor)", root: 49, type: "harmonic_minor",
-              rh: [2,3,1,2,3,1,2], lh: [3,2,1,4,3,2,1], arpRh: [2,3,1,2], arpLh: [3,2,1,3] },
-            { id: "B", name: "ロ長調 (B Major)", root: 59, type: "major",
-              rh: [1,2,3,1,2,3,4], lh: [4,3,2,1,4,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "G#m", name: "嬰ト短調 (G# Harmonic Minor)", root: 56, type: "harmonic_minor",
-              rh: [2,3,1,2,3,1,3], lh: [3,2,1,4,3,2,1], arpRh: [2,3,1,3], arpLh: [3,2,1,3] },
-            { id: "E", name: "ホ長調 (E Major)", root: 52, type: "major",
-              rh: [1,2,3,1,2,3,4], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "C#m", name: "嬰ハ短調(C#m Harmonic)", root: 49, type: "harmonic_minor",
-              rh: [2,3,1,2,3,1,2], lh: [3,2,1,4,3,2,1], arpRh: [2,3,1,2], arpLh: [3,2,1,3] },
-            { id: "A", name: "イ長調 (A Major)", root: 57, type: "major",
-              rh: [1,2,3,1,2,3,4], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "F#m", name: "嬰ヘ短調 (F# Harmonic Minor)", root: 54, type: "harmonic_minor",
-              rh: [2,3,1,2,3,1,2], lh: [4,3,2,1,3,2,1], arpRh: [2,3,1,2], arpLh: [3,2,1,3] },
-            { id: "D", name: "ニ長調 (D Major)", root: 50, type: "major",
-              rh: [1,2,3,1,2,3,4], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "Bm", name: "ロ短調 (B Harmonic Minor)", root: 59, type: "harmonic_minor",
-              rh: [1,2,3,1,2,3,4], lh: [4,3,2,1,4,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "G", name: "ト長調 (G Major)", root: 55, type: "major",
-              rh: [1,2,3,1,2,3,4], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] },
-            { id: "Em", name: "ホ短調 (E Harmonic Minor)", root: 52, type: "harmonic_minor",
-              rh: [1,2,3,1,2,3,4], lh: [5,4,3,2,1,3,2], arpRh: [1,2,3,5], arpLh: [5,4,2,1] }
+            // 長調 (Major)
+            { id: "C", name: "ハ長調 (C Major)", root: 60, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+            { id: "G", name: "ト長調 (G Major)", root: 67, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+            { id: "D", name: "ニ長調 (D Major)", root: 62, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+            { id: "A", name: "イ長調 (A Major)", root: 69, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+            { id: "E", name: "ホ長調 (E Major)", root: 64, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+            { id: "B", name: "ロ長調 (B Major)", root: 71, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+            { id: "F#", name: "嬰ヘ長調 (F# Major)", root: 66, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+            { id: "Db", name: "変ニ長調 (Db Major)", root: 61, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+            { id: "Ab", name: "変イ長調 (Ab Major)", root: 68, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+            { id: "Eb", name: "変ホ長調 (Eb Major)", root: 63, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+            { id: "Bb", name: "変ロ長調 (Bb Major)", root: 70, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+            { id: "F", name: "ヘ長調 (F Major)", root: 65, type: "major", offsets: [0, 2, 4, 5, 7, 9, 11, 12] },
+
+            // 和声短音階 (Harmonic Minor)
+            { id: "Am", name: "イ短調 (A Minor)", root: 69, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] },
+            { id: "Em", name: "ホ短調 (E Minor)", root: 64, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] },
+            { id: "Bm", name: "ロ短調 (B Minor)", root: 71, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] },
+            { id: "F#m", name: "嬰ヘ短調 (F# Minor)", root: 66, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] },
+            { id: "C#m", name: "嬰ハ短調 (C# Minor)", root: 61, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] },
+            { id: "G#m", name: "嬰ト短調 (G# Minor)", root: 68, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] },
+            { id: "Dbm", name: "嬰ハ短調(Dbm)", root: 61, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] }, // alt ref
+            { id: "Ebm", name: "嬰ト短調等", root: 63, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] },
+            { id: "Bbm", name: "変ロ短調 (Bb Minor)", root: 70, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] },
+            { id: "Fm", name: "ヘ短調 (F Minor)", root: 65, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] },
+            { id: "Cm", name: "ハ短調 (C Minor)", root: 60, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] },
+            { id: "Gm", name: "ト短調 (G Minor)", root: 67, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] },
+            { id: "Dm", name: "ニ短調 (D Minor)", root: 62, type: "harmonic_minor", offsets: [0, 2, 3, 5, 7, 8, 11, 12] }
         ];
 
-        // 4オクターブ分のオフセットと指番号を生成
-        function generate4OctaveData(scaleObj, mode, hand) {
-            let baseOffsets = [];
-            let patternFingers = [];
-
-            if (mode === 'scale') {
-                if (scaleObj.type === 'major') {
-                    baseOffsets = [0, 2, 4, 5, 7, 9, 11];
-                } else {
-                    baseOffsets = [0, 2, 3, 5, 7, 8, 11];
-                }
-                patternFingers = scaleObj[hand];
-            } else {
-                baseOffsets = [0, 4, 7, 12];
-                patternFingers = hand === 'rh' ? scaleObj.arpRh : scaleObj.arpLh;
-            }
-
-            let offsets = [];
-            let fingers = [];
-
-            if (mode === 'scale') {
-                for (let oct = 0; oct < 4; oct++) {
-                    for (let i = 0; i < 7; i++) {
-                        offsets.push(baseOffsets[i] + (oct * 12));
-                        fingers.push(patternFingers[i % patternFingers.length]);
-                    }
-                }
-                // 4オクターブ上の主音（終点）
-                offsets.push(48); // 4オクターブ分 = 48半音
-                fingers.push(hand === 'rh' ? 5 : 1);
-            } else {
-                for (let oct = 0; oct < 4; oct++) {
-                    for (let i = 0; i < 3; i++) {
-                        offsets.push(baseOffsets[i] + (oct * 12));
-                        fingers.push(patternFingers[i % patternFingers.length]);
-                    }
-                }
-                offsets.push(48);
-                fingers.push(hand === 'rh' ? 5 : 1);
-            }
-
-            return { offsets, fingers };
-        }
-
         let currentScaleId = "C";
-        let currentMode = "scale";
-        let currentHand = "rh";
         let audioCtx = null;
         let isPlaying = false;
         let playTimeoutId = null;
 
-        const modeSelect = document.getElementById('mode-select');
-        const scaleSelect = document.getElementById('scale-select');
-        const handRhBtn = document.getElementById('hand-rh');
-        const handLhBtn = document.getElementById('hand-lh');
+        const activeTitle = document.getElementById('active-title');
+        const scaleTypeTag = document.getElementById('scale-type-tag');
         const keyboardContainer = document.getElementById('keyboard-container');
-        const currentScaleBadge = document.getElementById('current-scale-badge');
-        const currentHandBadge = document.getElementById('current-hand-badge');
         const btnPlay = document.getElementById('btn-play');
         const btnStop = document.getElementById('btn-stop');
         const btnAudioInit = document.getElementById('btn-audio-init');
-        const scaleListGrid = document.getElementById('scale-list-grid');
+        const scaleGrid = document.getElementById('scale-grid');
 
-        function initAudioContext() {
+        function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-            btnAudioInit.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-emerald-300"></i> 音声準備OK';
-            btnAudioInit.className = "bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer";
+            btnAudioInit.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5 text-blue-600"><i> 準備完了';
+            btnAudioInit.className = "bg-white border border-gray-200 text-gray-800 text-xs font-medium px-4 py-2 rounded-full transition shadow-sm cursor-pointer flex items-center gap-1.5";
             lucide.createIcons();
         }
 
-        btnAudioInit.addEventListener('click', initAudioContext);
+        btnAudioInit.addEventListener('click', initAudio);
 
         function playTone(midiNote) {
             if (!audioCtx) {
@@ -277,105 +186,62 @@
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
 
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
 
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.8);
+            osc.stop(audioCtx.currentTime + 0.6);
         }
 
-        function initSelect() {
-            scaleSelect.innerHTML = '';
-            scalesData.forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item.id;
-                opt.textContent = item.name;
-                scaleSelect.appendChild(opt);
-            });
-            scaleSelect.value = currentScaleId;
-        }
-
-        function initScaleList() {
-            scaleListGrid.innerHTML = '';
-            scalesData.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-50 border border-slate-200 hover:border-indigo-400 p-3 rounded-xl flex items-center justify-between transition shadow-2xs";
-                card.innerHTML = `
-                    <div class="truncate pr-2">
-                        <div class="text-xs font-bold text-slate-700 truncate">${item.name}</div>
-                        <div class="text-[10px] text-slate-400">4オクターブ</div>
-                    </div>
-                    <button type="button" onclick="previewScale('${item.id}')" class="bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white p-2 rounded-lg transition shrink-0 cursor-pointer" title="試聴する">
-                        <i data-lucide="play" class="w-3.5 h-3.5"></i>
-                    </button>
-                `;
-                scaleListGrid.appendChild(card);
-            });
-            lucide.createIcons();
-        }
-
-        // 4オクターブ鍵盤描画 (C3 = 48 から C7 = 96)
-        function renderKeyboard(activeNoteIndex = -1) {
+        // 1オクターブ鍵盤描画 (C4 = 60 から C5 = 72)
+        function renderKeyboard(activeMidi = -1) {
             keyboardContainer.innerHTML = '';
             const scaleObj = scalesData.find(s => s.id === currentScaleId);
-            const { offsets, fingers } = generate4OctaveData(scaleObj, currentMode, currentHand);
-            const root = scaleObj.root;
+            const activeNotes = scaleObj.offsets.map(offset => scaleObj.root + offset);
 
-            const noteFingerMap = {};
-            offsets.forEach((offset, idx) => {
-                const note = root + offset;
-                if (idx < fingers.length) {
-                    noteFingerMap[note] = fingers[idx];
-                }
-            });
-
-            const startMidi = 48; // C3
-            const endMidi = 96;   // C7
-            const whiteKeyWidth = 36; // px
+            const startMidi = 60; // C4
+            const endMidi = 72;   // C5
+            const whiteKeyWidth = 52;
             let whiteIndex = 0;
 
-            // 白鍵カウント・描画
+            // 白鍵の総数カウント
             for (let m = startMidi; m <= endMidi; m++) {
-                const noteInOctave = m % 12;
-                const isBlack = [1, 3, 6, 8, 10].includes(noteInOctave);
-                if (!isBlack) whiteIndex++;
+                if (![1, 3, 6, 8, 10].includes(m % 12)) whiteIndex++;
             }
-            const totalWhiteKeys = whiteIndex;
-            keyboardContainer.style.width = `${totalWhiteKeys * whiteKeyWidth}px`;
+            keyboardContainer.style.width = `${whiteIndex * whiteKeyWidth}px`;
 
+            // 白鍵描画
             whiteIndex = 0;
             for (let m = startMidi; m <= endMidi; m++) {
-                const noteInOctave = m % 12;
-                const isBlack = [1, 3, 6, 8, 10].includes(noteInOctave);
-                const finger = noteFingerMap[m];
-                const isActive = (activeNoteIndex !== -1 && offsets[activeNoteIndex] + root === m);
-
+                const isBlack = [1, 3, 6, 8, 10].includes(m % 12);
                 if (!isBlack) {
-                    const keyEl = document.createElement('div');
-                    keyEl.className = `absolute top-0 bottom-0 white-key rounded-b-lg flex flex-col justify-end items-center pb-3 cursor-pointer transition ${isActive ? 'key-active-play' : ''}`;
-                    keyEl.style.left = `${whiteIndex * whiteKeyWidth}px`;
-                    keyEl.style.width = `${whiteKeyWidth}px`;
-                    keyEl.style.height = '170px';
-                    keyEl.style.zIndex = '1';
+                    const isInScale = activeNotes.includes(m);
+                    const isActivePlay = (activeMidi === m);
 
-                    if (finger) {
-                        const badge = document.createElement('span');
-                        badge.className = `w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm ${isActive ? 'bg-white text-indigo-700' : 'bg-indigo-600 text-white'}`;
-                        badge.textContent = finger;
-                        keyEl.appendChild(badge);
+                    const key = document.createElement('div');
+                    key.className = `absolute top-0 bottom-0 apple-key-white cursor-pointer transition-all duration-150 flex flex-col justify-end items-center pb-3 ${isActivePlay ? 'key-active' : isInScale ? 'bg-blue-50/80 border-blue-300' : ''}`;
+                    key.style.left = `${whiteIndex * whiteKeyWidth}px`;
+                    key.style.width = `${whiteKeyWidth}px`;
+                    key.style.height = '140px';
+                    key.style.zIndex = '1';
+
+                    if (isInScale) {
+                        const dot = document.createElement('div');
+                        dot.className = `w-2.5 h-2.5 rounded-full ${isActivePlay ? 'bg-white' : 'bg-blue-600 shadow-sm'}`;
+                        key.appendChild(dot);
                     }
 
-                    keyEl.addEventListener('click', () => {
-                        initAudioContext();
+                    key.addEventListener('click', () => {
+                        initAudio();
                         playTone(m);
-                        keyEl.classList.add('bg-sky-200');
-                        setTimeout(() => keyEl.classList.remove('bg-sky-200'), 300);
+                        key.classList.add('bg-blue-200');
+                        setTimeout(() => key.classList.remove('bg-blue-200'), 250);
                     });
 
-                    keyboardContainer.appendChild(keyEl);
+                    keyboardContainer.appendChild(key);
                     whiteIndex++;
                 }
             }
@@ -383,87 +249,107 @@
             // 黒鍵描画
             whiteIndex = 0;
             for (let m = startMidi; m <= endMidi; m++) {
-                const noteInOctave = m % 12;
-                const isBlack = [1, 3, 6, 8, 10].includes(noteInOctave);
-                const finger = noteFingerMap[m];
-                const isActive = (activeNoteIndex !== -1 && offsets[activeNoteIndex] + root === m);
-
+                const isBlack = [1, 3, 6, 8, 10].includes(m % 12);
                 if (!isBlack) {
                     whiteIndex++;
                 } else {
-                    const keyEl = document.createElement('div');
-                    const leftPos = (whiteIndex * whiteKeyWidth) - 11;
-                    keyEl.className = `absolute top-0 black-key rounded-b-md flex flex-col justify-end items-center pb-2 cursor-pointer transition shadow-md ${isActive ? 'key-active-play !bg-sky-400' : ''}`;
-                    keyEl.style.left = `${leftPos}px`;
-                    keyEl.style.width = '22px';
-                    keyEl.style.height = '105px';
-                    keyEl.style.zIndex = '10';
+                    const isInScale = activeNotes.includes(m);
+                    const isActivePlay = (activeMidi === m);
+                    const leftPos = (whiteIndex * whiteKeyWidth) - 14;
 
-                    if (finger) {
-                        const badge = document.createElement('span');
-                        badge.className = `w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shadow ${isActive ? 'bg-indigo-900 text-white' : 'bg-amber-500 text-slate-900'}`;
-                        badge.textContent = finger;
-                        keyEl.appendChild(badge);
+                    const key = document.createElement('div');
+                    key.className = `absolute top-0 apple-key-black cursor-pointer transition-all duration-150 flex flex-col justify-end items-center pb-2 ${isActivePlay ? 'key-active !bg-blue-400' : isInScale ? '!bg-slate-700 ring-1 ring-blue-400/50' : ''}`;
+                    key.style.left = `${leftPos}px`;
+                    key.style.width = '28px';
+                    key.style.height = '88px';
+                    key.style.zIndex = '10';
+
+                    if (isInScale) {
+                        const dot = document.createElement('div');
+                        dot.className = `w-1.5 h-1.5 rounded-full ${isActivePlay ? 'bg-white' : 'bg-blue-400 shadow'}`;
+                        key.appendChild(dot);
                     }
 
-                    keyEl.addEventListener('click', (e) => {
+                    key.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        initAudioContext();
+                        initAudio();
                         playTone(m);
-                        keyEl.classList.add('bg-slate-700');
-                        setTimeout(() => keyEl.classList.remove('bg-slate-700'), 300);
+                        key.classList.add('bg-slate-500');
+                        setTimeout(() => key.classList.remove('bg-slate-500'), 250);
                     });
 
-                    keyboardContainer.appendChild(keyEl);
+                    keyboardContainer.appendChild(key);
                 }
             }
         }
 
-        function updateView() {
+        function updateUI() {
             const scaleObj = scalesData.find(s => s.id === currentScaleId);
-            const modeName = currentMode === 'scale' ? '音階 (スケール)' : '分散和音 (アルペジオ)';
-            currentScaleBadge.textContent = `${scaleObj.name} ${modeName}`;
-            currentHandBadge.textContent = currentHand === 'rh' ? '右手フィンガリング (RH)' : '左手フィンガリング (LH)';
-            
-            if (currentHand === 'rh') {
-                handRhBtn.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow-sm cursor-pointer";
-                handLhBtn.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 cursor-pointer";
-            } else {
-                handLhBtn.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition bg-indigo-600 text-white shadow-sm cursor-pointer";
-                handRhBtn.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 cursor-pointer";
-            }
-
+            activeTitle.textContent = scaleObj.name;
+            scaleTypeTag.textContent = scaleObj.type === 'major' ? 'Major Scale' : 'Harmonic Minor';
             renderKeyboard(-1);
+            initGrid();
         }
 
-        function startAutoPlay() {
-            initAudioContext();
+        function initGrid() {
+            scaleGrid.innerHTML = '';
+            scalesData.forEach(item => {
+                const isSelected = item.id === currentScaleId;
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl transition cursor-pointer flex items-center justify-between border ${isSelected ? 'bg-blue-50/60 border-blue-500 shadow-sm' : 'glass-panel hover:border-gray-300'}`;
+                card.innerHTML = `
+                    <div>
+                        <div class="text-xs font-semibold text-gray-900">${item.name}</div>
+                        <div class="text-[10px] text-gray-400 mt-0.5">${item.type === 'major' ? '長調' : '和声短音階'}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="event.stopPropagation(); playDirect('${item.id}')" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-blue-600 hover:text-white text-gray-700 flex items-center justify-center transition shadow-2xs">
+                            <i data-lucide="play" class="w-3.5 h-3.5 fill-current ml-0.5"></i>
+                        </button>
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    currentScaleId = item.id;
+                    updateUI();
+                });
+                scaleGrid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        window.playDirect = function(scaleId) {
+            initAudio();
+            currentScaleId = scaleId;
+            updateUI();
+            startPlay();
+        };
+
+        function startPlay() {
+            initAudio();
             if (isPlaying) return;
             const scaleObj = scalesData.find(s => s.id === currentScaleId);
-            const { offsets } = generate4OctaveData(scaleObj, currentMode, currentHand);
-            const root = scaleObj.root;
+            const notes = scaleObj.offsets.map(offset => scaleObj.root + offset);
 
             isPlaying = true;
             btnPlay.classList.add('hidden');
             btnStop.classList.remove('hidden');
 
-            let index = 0;
+            let idx = 0;
             function step() {
                 if (!isPlaying) return;
-                if (index < offsets.length) {
-                    const midiNote = root + offsets[index];
-                    playTone(midiNote);
-                    renderKeyboard(index);
-                    index++;
-                    playTimeoutId = setTimeout(step, 250);
+                if (idx < notes.length) {
+                    playTone(notes[idx]);
+                    renderKeyboard(notes[idx]);
+                    idx++;
+                    playTimeoutId = setTimeout(step, 320);
                 } else {
-                    stopAutoPlay();
+                    stopPlay();
                 }
             }
             step();
         }
 
-        function stopAutoPlay() {
+        function stopPlay() {
             isPlaying = false;
             if (playTimeoutId) clearTimeout(playTimeoutId);
             btnPlay.classList.remove('hidden');
@@ -471,40 +357,12 @@
             renderKeyboard(-1);
         }
 
-        window.previewScale = function(scaleId) {
-            initAudioContext();
-            scaleSelect.value = scaleId;
-            currentScaleId = scaleId;
-            updateView();
-            startAutoPlay();
-        };
+        btnPlay.addEventListener('click', startPlay);
+        btnStop.addEventListener('click', stopPlay);
 
-        modeSelect.addEventListener('change', (e) => {
-            currentMode = e.target.value;
-            updateView();
-        });
-
-        scaleSelect.addEventListener('change', (e) => {
-            currentScaleId = e.target.value;
-            updateView();
-        });
-
-        handRhBtn.addEventListener('click', () => {
-            currentHand = 'rh';
-            updateView();
-        });
-
-        handLhBtn.addEventListener('click', () => {
-            currentHand = 'lh';
-            updateView();
-        });
-
-        btnPlay.addEventListener('click', startAutoPlay);
-        btnStop.addEventListener('click', stopAutoPlay);
-
-        initSelect();
-        initScaleList();
-        updateView();
+        // 初期化実行
+        initGrid();
+        updateUI();
     </script>
 </body>
 </html>
